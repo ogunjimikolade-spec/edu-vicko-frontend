@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Results</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+
+        h1 {
+            color: #004aad;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input,
+        select,
+        button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #004aad;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #003580;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #004aad;
+            color: white;
+        }
+
+        .A {
+            background: #d4edda;
+        }
+
+        .B {
+            background: #cce5ff;
+        }
+
+        .C {
+            background: #fff3cd;
+        }
+
+        .D {
+            background: #ffeeba;
+        }
+
+        .F {
+            background: #f8d7da;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Student Results - 2025/2026 First Term</h1>
+
+    <form id="resultForm">
+        <h3>Add New Result</h3>
+        <input type="text" id="studentId" placeholder="Student ID" required>
+        <input type="text" id="name" placeholder="Student Name" required>
+        <input type="text" id="subject" placeholder="Subject" required>
+        <select id="term" required>
+            <option value="">Select Term</option>
+            <option>First Term</option>
+            <option>Second Term</option>
+            <option>Third Term</option>
+        </select>
+        <input type="text" id="session" placeholder="Session e.g 2025/2026" required>
+        <input type="number" id="score" placeholder="Score 0-100" required>
+        <button type="submit">Add Result</button>
+    </form>
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Term</th>
+                <th>Session</th>
+                <th>Score</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000/api/results';
+
+        // LOAD RESULTS ON PAGE LOAD
+        function loadResults() {
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.querySelector('#resultsTable tbody');
+                    tbody.innerHTML = '';
+                    data.forEach((r, i) => {
+                        tbody.innerHTML += `
+        <tr class="${r.grade}">
+          <td>${i + 1}</td>
+          <td>${r.studentId}</td>
+          <td>${r.name}</td>
+          <td>${r.subject}</td>
+          <td>${r.term}</td>
+          <td>${r.session}</td>
+          <td>${r.score}</td>
+          <td><b>${r.grade}</b></td>
+        </tr>
+      `;
+                    });
+                });
+        }
+
+        // SUBMIT NEW RESULT
+        document.getElementById('resultForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newResult = {
+                studentId: document.getElementById('studentId').value,
+                name: document.getElementById('name').value,
+                subject: document.getElementById('subject').value,
+                term: document.getElementById('term').value,
+                session: document.getElementById('session').value,
+                score: Number(document.getElementById('score').value)
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newResult)
+            })
+                .then(res => res.json())
+                .then(() => {
+                    alert('Result Added Successfully!');
+                    document.getElementById('resultForm').reset();
+                    loadResults(); // refresh table
+                });
+        });
+
+        loadResults(); // run on start
+    </script>
+</body>
+
+</html>
