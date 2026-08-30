@@ -31,21 +31,21 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         
-        <div className="bg-gray-800 p-6 rounded-lg text-center">
+        <div className="bg-purple-700 p-6 rounded-lg text-center">
           <h3 className="text-gray-400">Students</h3>
           <p className="text-3xl font-bold text-white">
             {loading ? "..." : stats.students}
           </p>
         </div>
 
-        <div className="bg-gray-800 p-6 rounded-lg text-center">
+        <div className="bg-purple-700 p-6 rounded-lg text-center">
           <p className="text-gray-400">Teachers</p>
           <p className="text-3xl font-bold text-white">
             {loading ? "..." : stats.teachers}
           </p>
         </div>
 
-        <div className="bg-gray-800 p-6 rounded-lg text-center">
+        <div className="bg-purple-700 p-6 rounded-lg text-center">
           <p className="text-gray-400">Classes</p>
           <p className="text-3xl font-bold text-white">
             {loading ? "..." : stats.classes}

@@ -84,9 +84,9 @@ function Students() {
         </Link>
       </div>
 
-      <table className="border w-full">
+      <table className=" bg: bg-purple-700 border w-full">
         <thead>
-          <tr>
+          <tr className="bg: bg-purple-900">
             <th className="border p-2">Student ID</th>
             <th className="border p-2">Name</th>
             <th className="border p-2">Gender</th>

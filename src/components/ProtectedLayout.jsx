@@ -16,7 +16,7 @@ const ProtectedLayout = () => {
     <>
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <div className="flex h-screen">
-        <aside className="w-50 bg-gray-800 p-2">
+        <aside className="w-50 bg-purple-700 p-2">
           <h2 className="text-2xl font-bold text-cyan-400 mb-8">EDUVICKO</h2>
           <nav className="flex flex-col gap-2">
             <Link to="/dashboard" className="p-3 rounded-lg hover:bg-gray-700">

@@ -39,30 +39,30 @@ function Registration() {
       <h1 className="text-2xl font-bold mb-4">Student Registration</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-w-md">
        
-          <input className="bg-slate-600"
+          <input className="bg-slate-300"
           name="name"
           placeholder="Full Name"
           onChange={handleChange}
           required
         />
-        <input className="bg-slate-600" name="gender" placeholder="Gender" onChange={handleChange} />
-        <input className="bg-slate-600" name="dob" type="date" onChange={handleChange} />
-        <input className="bg-slate-600"
+        <input className="bg-slate-300" name="gender" placeholder="Gender" onChange={handleChange} />
+        <input className="bg-slate-300" name="dob" type="date" onChange={handleChange} />
+        <input className="bg-slate-300"
           name="class"
           placeholder="Class e.g pry 5"
           onChange={handleChange}
         />
-        <input className="bg-slate-600"
+        <input className="bg-slate-300"
           name="parentName"
           placeholder="Parent Name"
           onChange={handleChange}
         />
-        <input className="bg-slate-600"
+        <input className="bg-slate-300"
           name="parentPhone"
           placeholder="Parent Phone"
           onChange={handleChange}
         />
-        <input className="bg-slate-600" name="address" placeholder="Address" onChange={handleChange} />
+        <input className="bg-slate-300" name="address" placeholder="Address" onChange={handleChange} />
         <button className="bg-blue-500 text-white p-2 rounded">Register</button>
       </form>
     </div>

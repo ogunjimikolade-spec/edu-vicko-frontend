@@ -2,4 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-body {background:#0f172a; color:#f8fafc; font-family:Arial, sans-serif}
+body {background:#0f172a; color:#f1f1f1; font-family:Arial, sans-serif}
+
+
+input {
+    background-color: #ffffff;
+    color: #000 ;
+    border: 1px solid #334455
+}
+
+input::placeholder {
+    color: #94a3b8
+}

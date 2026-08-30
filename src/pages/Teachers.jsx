@@ -62,9 +62,9 @@ export default function Teachers() {
       </div>
 
       {/* TEACHERS TABLE */}
-      <table className="w-full border">
+      <table className="bg-purple-700 w-full border">
         <thead>
-          <tr className="bg-gray-800">
+          <tr className="bg-purple-900">
             <th className="p-2 border">Name</th>
             <th className="p-2 border">Email</th>
             <th className="p-2 border">Phone</th>

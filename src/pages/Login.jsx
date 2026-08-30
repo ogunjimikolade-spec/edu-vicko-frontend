@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ const Login = () => {
         },
       );
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", res.data.name);
+      localStorage.setItem("user",JSON.stringify(res.data.name));
       navigate("/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login Failed");
@@ -94,6 +94,7 @@ const Login = () => {
         >
           Login
         </button>
+        {/* <p className="text-red-950">Don't have an account?    <Link to="/register" className="bg-green-600 text-gray-600">Register</Link></p> */}
       </form>
     </div>
   );

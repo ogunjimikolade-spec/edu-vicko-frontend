@@ -49,7 +49,7 @@ const Fees = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/fees/addpayment`, form);
+      await axios.post(`${API_URL}/fees/addpayment`, form);
       alert("Payment successful!");
       setForm({
         studentId: "",
@@ -70,12 +70,9 @@ const Fees = () => {
   };
   const handleUpdate = async (e) => {
     e.preventDefault();
-    await axios.put(
-      `${import.meta.env.VITE_API_URL}/fees/update/${editingFee._id}`,
-      {
-        amountPaid: editingFee.amountPaid,
-      },
-    );
+    await axios.put(`${API_URL}/fees/update/${editingFee._id}`, {
+      amountPaid: editingFee.amountPaid,
+    });
     alert("Updated!");
     setEditingFee(null);
     fetchFees();
@@ -137,14 +134,13 @@ const Fees = () => {
   const handleView = (fee) => {
     setViewingFee(fee);
   };
-const handleWhatsApp = (fee) => {
-  const message = `Hello ${fee.studentName} Parent,%0A%0A*SCHOOL FEE RECEIPT*%0A%0AStudent ID: ${fee.studentId}%0AClass: ${fee.class}%0ATerm: ${fee.term}%0A%0ATotal Amount: ₦${fee.amount.toLocaleString()}%0AAmount Paid: ₦${fee.amountPaid.toLocaleString()}%0ABalance: ₦${fee.balance.toLocaleString()}%0AStatus: ${fee.status}%0A%0AThank you!`;
+  const handleWhatsApp = (fee) => {
+    const message = `Hello ${fee.studentName} Parent,%0A%0A*SCHOOL FEE RECEIPT*%0A%0AStudent ID: ${fee.studentId}%0AClass: ${fee.class}%0ATerm: ${fee.term}%0A%0ATotal Amount: ₦${fee.amount.toLocaleString()}%0AAmount Paid: ₦${fee.amountPaid.toLocaleString()}%0ABalance: ₦${fee.balance.toLocaleString()}%0AStatus: ${fee.status}%0A%0AThank you!`;
 
-  // Replace with parent's number. For now we just open WhatsApp
-  const url = `https://wa.me/?text=${message}`;
-  window.open(url, "_blank");
-};
-
+    // Replace with parent's number. For now we just open WhatsApp
+    const url = `https://wa.me/?text=${message}`;
+    window.open(url, "_blank");
+  };
 
   return (
     <div style={{ padding: "20px", color: "white" }}>
@@ -246,6 +242,15 @@ const handleWhatsApp = (fee) => {
               style={{ backgroundColor: "lightblue", padding: "10px" }}
               value={form.amountPaid}
               onChange={handleChange}
+            />
+            <input
+              name="Parent Phone"
+              type="number"
+              placeholder="Parent Phone"
+              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              value={form.parentNumber}
+              onChange={handleChange}
+              required
             />
           </div>
           <button
@@ -487,6 +492,22 @@ const handleWhatsApp = (fee) => {
             </p>
             <p>
               <b>Status:</b> {viewingFee.status}
+            </p>
+            <p>
+              <b>Date:</b>
+              {viewingFee.date
+                ? new Date(viewingFee.date).toLocaleDateString("en-NG", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "N/A" }
+            </p>
+            <p>
+              <b>Time:</b>
+              {viewingFee.date
+                ? new Date(viewingFee.date).toLocaleTimeString("en-NG")
+                : "N/A" }
             </p>
             <button
               onClick={() => setViewingFee(null)}
