@@ -81,7 +81,7 @@ const ProtectedLayout = () => {
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <div className="flex h-screen bg-[#0a0f1e] text-white">
+      <div className="flex m-h-screen bg-[#0a0f1e] text-white">
         {/* SIDEBAR - Mobile: slide in, Desktop: always visible */}
         <aside
           className={`fixed inset-y-0 left-0 z-30 w-64 bg-purple-700 p-4 transform
@@ -103,7 +103,7 @@ const ProtectedLayout = () => {
         )}
 
         {/* MAIN CONTENT */}
-        <div className="flex-1 flex-col overflow-hidden">
+        <div className="flex-1 flex-col">
           {/* TOP BAR - Only shows on mobile */}
           <header className="md:hidden bg-[#0a0f1e] p-4 sticky top-0 z-10 border-b border-gray-800">
             <button onClick={() => setSidebarOpen(true)} className="text-3xl">
