@@ -136,7 +136,7 @@ const Fees = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 text-white space-y-6">
+    <div className="p-4 md:p-6 text-white space-y-6 pb-20">
       <h2 className="text-2xl md:text-3xl font-bold">Fee Management</h2>
 
       {/* SEARCH */}
@@ -264,7 +264,7 @@ const Fees = () => {
         </div>
 
         {/* TABLE WITH HORIZONTAL SCROLL */}
-        <div className="overflow-x-auto bg-purple-900 rounded-xl p-2">
+        <div className="overflow-x-auto overflow-y-visible bg-purple-900 rounded-xl p-2">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-800">
               <tr>
@@ -414,6 +414,7 @@ const Fees = () => {
           </div>
         </div>
       )}
+      <div className="h-10 md:hiddden"></div>
     </div>
   );
 };
