@@ -103,7 +103,7 @@ const ProtectedLayout = () => {
         )}
 
         {/* MAIN CONTENT */}
-        <div className="flex-1 flex-col">
+        <div className="flex-1 flex flex-col">
           {/* TOP BAR - Only shows on mobile */}
           <header className="md:hidden bg-[#0a0f1e] p-4 sticky top-0 z-10 border-b border-gray-800">
             <button onClick={() => setSidebarOpen(true)} className="text-3xl">
