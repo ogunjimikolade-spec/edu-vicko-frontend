@@ -4,8 +4,8 @@ import axios from "axios";
 
 const Fees = () => {
   const [fees, setFees] = useState([]);
-  const totalPaid = fees.reduce((sum, f) => sum + Number(f.amountPaid), 0);
-  const totalAmount = fees.reduce((sum, f) => sum + Number(f.amount), 0);
+  const totalPaid = fees.reduce((sum, f) => sum + Number(f.amountPaid || 0), 0);
+  const totalAmount = fees.reduce((sum, f) => sum + Number(f.amount || 0), 0);
   const totalBalance = totalAmount - totalPaid;
   const [search, setSearch] = useState("");
   const [editingFee, setEditingFee] = useState(null);
@@ -18,6 +18,7 @@ const Fees = () => {
     type: "",
     amount: "",
     amountPaid: "",
+    parentNumber: "",
   });
 
   const API_URL = `${import.meta.env.VITE_API_URL}/api`;
@@ -29,7 +30,7 @@ const Fees = () => {
   const fetchFees = async () => {
     try {
       const res = await axios.get(`${API_URL}/fees`);
-      setFees(res.data || res.data);
+      setFees(res.data || []);
     } catch (error) {
       console.log(error);
     }
@@ -59,15 +60,15 @@ const Fees = () => {
         type: "",
         amount: "",
         amountPaid: "",
+        parentNumber: "",
       });
       fetchFees();
     } catch (error) {
       alert(error.response?.data?.message || "Error");
     }
   };
-  const handleEdit = (fee) => {
-    setEditingFee(fee);
-  };
+
+  const handleEdit = (fee) => setEditingFee(fee);
   const handleUpdate = async (e) => {
     e.preventDefault();
     await axios.put(`${API_URL}/fees/update/${editingFee._id}`, {
@@ -78,7 +79,7 @@ const Fees = () => {
     fetchFees();
   };
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delet this record?")) {
+    if (window.confirm("Are you sure you want to delete this record?")) {
       try {
         await axios.delete(`${API_URL}/fees/${id}`);
         alert("Deleted!");
@@ -88,35 +89,32 @@ const Fees = () => {
       }
     }
   };
+
   const handlePrint = (fee) => {
     const printWindow = window.open("", "", "height=600,width=400");
     printWindow.document.write(`
-    <html>
-      <head><title>Receipt</title></head>
+    <html><head><title>Receipt</title></head>
       <body style="font-family: Arial; padding: 20px;">
-        <h2 style="text-align:center">SCHOOL FEE RECEIPT</h2>
-        <hr/>
+        <h2 style="text-align:center">SCHOOL FEE RECEIPT</h2><hr/>
         <p><b>Student ID:</b> ${fee.studentId}</p>
-        <p><b>Name:</b> ${fee.studentName}</p>
+        <p><b>Name:</b> ${fee.name}</p>
         <p><b>Class:</b> ${fee.class}</p>
-        <p><b>Term:</b> ${fee.term}</p>
-        <hr/>
-        <p><b>Total Amount:</b> ₦${fee.amount.toLocaleString()}</p>
-        <p><b>Amount Paid:</b> ₦${fee.amountPaid.toLocaleString()}</p>
-        <p><b>Balance:</b> ₦${fee.balance.toLocaleString()}</p>
-        <p><b>Status:</b> ${fee.status}</p>
-        <hr/>
+        <p><b>Term:</b> ${fee.term}</p><hr/>
+        <p><b>Total Amount:</b> ₦${Number(fee.amount).toLocaleString()}</p>
+        <p><b>Amount Paid:</b> ₦${Number(fee.amountPaid).toLocaleString()}</p>
+        <p><b>Balance:</b> ₦${Number(fee.balance).toLocaleString()}</p>
+        <p><b>Status:</b> ${fee.status}</p><hr/>
         <p style="text-align:center">Thank you!</p>
         <script>window.print();</script>
-      </body>
-    </html>
+      </body></html>
   `);
     printWindow.document.close();
   };
+
   const handleExport = () => {
     const data = fees.map((f) => ({
       "Student ID": f.studentId,
-      Name: f.studentName,
+      Name: f.name,
       Class: f.class,
       Term: f.term,
       "Total Amount": f.amount,
@@ -124,63 +122,42 @@ const Fees = () => {
       Balance: f.balance,
       Status: f.status,
     }));
-
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Fee Records");
     XLSX.writeFile(wb, `Fee_Report_${new Date().toLocaleDateString()}.xlsx`);
   };
 
-  const handleView = (fee) => {
-    setViewingFee(fee);
-  };
+  const handleView = (fee) => setViewingFee(fee);
   const handleWhatsApp = (fee) => {
-    const message = `Hello ${fee.studentName} Parent,%0A%0A*SCHOOL FEE RECEIPT*%0A%0AStudent ID: ${fee.studentId}%0AClass: ${fee.class}%0ATerm: ${fee.term}%0A%0ATotal Amount: ₦${fee.amount.toLocaleString()}%0AAmount Paid: ₦${fee.amountPaid.toLocaleString()}%0ABalance: ₦${fee.balance.toLocaleString()}%0AStatus: ${fee.status}%0A%0AThank you!`;
-
-    // Replace with parent's number. For now we just open WhatsApp
+    const message = `Hello ${fee.name} Parent,%0A%0A*SCHOOL FEE RECEIPT*%0A%0AStudent ID: ${fee.studentId}%0AClass: ${fee.class}%0ATerm: ${fee.term}%0A%0ATotal Amount: ₦${Number(fee.amount).toLocaleString()}%0AAmount Paid: ₦${Number(fee.amountPaid).toLocaleString()}%0ABalance: ₦${Number(fee.balance).toLocaleString()}%0AStatus: ${fee.status}%0A%0AThank you!`;
     const url = `https://wa.me/?text=${message}`;
     window.open(url, "_blank");
   };
 
   return (
-    <div style={{ padding: "20px", color: "white" }}>
-      <h2>Fee Management</h2>
+    <div className="p-4 md:p-6 text-white space-y-6">
+      <h2 className="text-2xl md:text-3xl font-bold">Fee Management</h2>
 
+      {/* SEARCH */}
       <input
         type="text"
         placeholder="Search by StudentID, Name, or Class..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{
-          marginBottom: "20px",
-          padding: "8px",
-          width: "300px",
-          background: "gray",
-        }}
+        className="w-full md:w-96 mb-4 p-3 rounded bg-gray-600 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      <div
-        style={{
-          marginBottom: "30px",
-          border: "1px solid #555",
-          padding: "15px",
-          borderRadius: "5px",
-        }}
-      >
-        <h3>Add Payment</h3>
-        <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-              marginBottom: "10px",
-            }}
-          >
+      {/* ADD PAYMENT FORM */}
+      <div className="bg-purple-900 p-4 md:p-6 rounded-xl shadow-lg">
+        <h3 className="text-xl md:text-2xl font-bold mb-4">Add Payment</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Row 1: 1 col mobile, 4 cols desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <input
               name="studentId"
               placeholder="Student ID"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.studentId}
               onChange={handleChange}
               required
@@ -188,7 +165,7 @@ const Fees = () => {
             <input
               name="name"
               placeholder="Student Name"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.name}
               onChange={handleChange}
               required
@@ -196,7 +173,7 @@ const Fees = () => {
             <input
               name="class"
               placeholder="Class"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.class}
               onChange={handleChange}
               required
@@ -204,24 +181,18 @@ const Fees = () => {
             <input
               name="term"
               placeholder="Term"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.term}
               onChange={handleChange}
               required
             />
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-              marginBottom: "10px",
-            }}
-          >
+          {/* Row 2 */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <input
               name="type"
               placeholder="Fee Type"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.type}
               onChange={handleChange}
               required
@@ -230,7 +201,7 @@ const Fees = () => {
               name="amount"
               type="number"
               placeholder="Amount"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.amount}
               onChange={handleChange}
               required
@@ -239,15 +210,15 @@ const Fees = () => {
               name="amountPaid"
               type="number"
               placeholder="Amount Paid"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.amountPaid}
               onChange={handleChange}
             />
             <input
-              name="Parent Phone"
+              name="parentNumber"
               type="number"
               placeholder="Parent Phone"
-              style={{ backgroundColor: "lightblue", padding: "10px" }}
+              className="w-full p-3 rounded bg-sky-200 text-black"
               value={form.parentNumber}
               onChange={handleChange}
               required
@@ -255,222 +226,169 @@ const Fees = () => {
           </div>
           <button
             type="submit"
-            style={{ backgroundColor: "green", padding: "10px" }}
+            className="w-full md:w-auto bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-bold"
           >
             Add Payment
           </button>
         </form>
       </div>
 
+      {/* SUMMARY CARDS + EXPORT */}
       <div>
-        <h3>Payment Records</h3>
-        <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-          <div
-            style={{
-              padding: "15px",
-              background: "#74a378",
-              borderRadius: "8px",
-            }}
-          >
-            <h4>Total Paid</h4>
-            <h2 style={{ color: "green" }}>₦{totalPaid.toLocaleString()}</h2>
+        <h3 className="text-xl md:text-2xl font-bold mb-4">Payment Records</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="p-4 bg-[#74a378] rounded-lg">
+            <h4 className="text-sm">Total Paid</h4>
+            <h2 className="text-2xl font-bold text-green-900">
+              ₦{totalPaid.toLocaleString()}
+            </h2>
           </div>
-          <div
-            style={{
-              padding: "15px",
-              background: "#0dad3d",
-              borderRadius: "8px",
-            }}
-          >
-            <h4>Total Amount</h4>
-            <h2>₦{totalAmount.toLocaleString()}</h2>
+          <div className="p-4 bg-[#0dad3d] rounded-lg">
+            <h4 className="text-sm">Total Amount</h4>
+            <h2 className="text-2xl font-bold">
+              ₦{totalAmount.toLocaleString()}
+            </h2>
           </div>
-          <div
-            style={{
-              padding: "15px",
-              background: "#550f03",
-              borderRadius: "8px",
-            }}
-          >
-            <h4>Total Balance</h4>
-            <h2 style={{ color: "red" }}>₦{totalBalance.toLocaleString()}</h2>
+          <div className="p-4 bg-[#550f03] rounded-lg">
+            <h4 className="text-sm">Total Balance</h4>
+            <h2 className="text-2xl font-bold text-red-400">
+              ₦{totalBalance.toLocaleString()}
+            </h2>
           </div>
           <button
             onClick={handleExport}
-            style={{
-              background: "purple",
-              padding: "10px",
-              borderRadius: "5px",
-              marginBottom: "20px",
-            }}
+            className="bg-purple-600 hover:bg-purple-700 px-4 py-3 rounded font-bold"
           >
             Export to Excel
           </button>
         </div>
 
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                StudentID
-              </th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Name</th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                Class
-              </th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Term</th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                Amount
-              </th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Paid</th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                Balance
-              </th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                Status
-              </th>
-              <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredFees.map((fee) => (
-              <tr key={fee._id}>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.studentId}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.name}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.class}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.term}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.amount}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.amountPaid}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.balance}
-                </td>
-                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                  {fee.status}
-                </td>
-                <td
-                  style={{
-                    border: "1px solid #ddd",
-                    padding: "8px",
-                    display: "flex",
-                    gap: "5px",
-                  }}
-                >
-                  <button
-                    onClick={() => handleEdit(fee)}
-                    style={{ background: "blue" }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(fee._id)}
-                    style={{ background: "red" }}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => handlePrint(fee)}
-                    style={{ background: "green" }}
-                  >
-                    Print
-                  </button>
-                  <button
-                    onClick={() => handleWhatsApp(fee)}
-                    style={{ background: "darkblue" }}
-                  >
-                    WhatsApp
-                  </button>
-                  <button
-                    onClick={() => handleView(fee)}
-                    style={{ background: "purple" }}
-                  >
-                    View
-                  </button>
-                </td>
+        {/* TABLE WITH HORIZONTAL SCROLL */}
+        <div className="overflow-x-auto bg-purple-900 rounded-xl p-2">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-800">
+              <tr>
+                <th className="p-3 text-left">StudentID</th>
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Class</th>
+                <th className="p-3 text-left">Term</th>
+                <th className="p-3 text-left">Amount</th>
+                <th className="p-3 text-left">Paid</th>
+                <th className="p-3 text-left">Balance</th>
+                <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredFees.map((fee) => (
+                <tr
+                  key={fee._id}
+                  className="border-b border-gray-700 hover:bg-gray-800"
+                >
+                  <td className="p-3">{fee.studentId}</td>
+                  <td className="p-3">{fee.name}</td>
+                  <td className="p-3">{fee.class}</td>
+                  <td className="p-3">{fee.term}</td>
+                  <td className="p-3">
+                    ₦{Number(fee.amount).toLocaleString()}
+                  </td>
+                  <td className="p-3">
+                    ₦{Number(fee.amountPaid).toLocaleString()}
+                  </td>
+                  <td className="p-3">
+                    ₦{Number(fee.balance).toLocaleString()}
+                  </td>
+                  <td className="p-3">{fee.status}</td>
+                  <td className="p-3">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleEdit(fee)}
+                        className="bg-blue-600 px-2 py-1 rounded text-xs"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(fee._id)}
+                        className="bg-red-600 px-2 py-1 rounded text-xs"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => handlePrint(fee)}
+                        className="bg-green-600 px-2 py-1 rounded text-xs"
+                      >
+                        Print
+                      </button>
+                      <button
+                        onClick={() => handleWhatsApp(fee)}
+                        className="bg-green-700 px-2 py-1 rounded text-xs"
+                      >
+                        WhatsApp
+                      </button>
+                      <button
+                        onClick={() => handleView(fee)}
+                        className="bg-purple-600 px-2 py-1 rounded text-xs"
+                      >
+                        View
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
+      {/* EDIT MODAL */}
       {editingFee && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            background: "#333",
-            padding: "20px",
-            zIndex: 10,
-          }}
-        >
-          <h3>Edit Payment for {editingFee.name}</h3>
-          <form onSubmit={handleUpdate}>
-            <input
-              style={{ background: "gray" }}
-              type="number"
-              value={editingFee.amountPaid}
-              onChange={(e) =>
-                setEditingFee({ ...editingFee, amountPaid: e.target.value })
-              }
-            />
-            <button
-              type="submit"
-              style={{ backgroundColor: "green", padding: "5px" }}
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              style={{ backgroundColor: "red", padding: "5px" }}
-              onClick={() => setEditingFee(null)}
-            >
-              Cancel
-            </button>
-          </form>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">
+              Edit Payment for {editingFee.name}
+            </h3>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <input
+                type="number"
+                className="w-full p-3 rounded bg-gray-600"
+                value={editingFee.amountPaid}
+                onChange={(e) =>
+                  setEditingFee({ ...editingFee, amountPaid: e.target.value })
+                }
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="bg-green-600 px-4 py-2 rounded"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="bg-red-600 px-4 py-2 rounded"
+                  onClick={() => setEditingFee(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
+      {/* VIEW MODAL */}
       {viewingFee && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"
+          onClick={() => setViewingFee(null)}
         >
           <div
-            style={{
-              background: "white",
-              padding: "30px",
-              borderRadius: "10px",
-              width: "400px",
-              color: "black",
-            }}
+            className="bg-white p-6 rounded-lg w-full max-w-md text-black"
+            onClick={(e) => e.stopPropagation()}
           >
-            <h3>Payment Details</h3>
+            <h3 className="text-xl font-bold mb-4">Payment Details</h3>
             <p>
-              <b>Student:</b> {viewingFee.studentName}
+              <b>Student:</b> {viewingFee.name}
             </p>
             <p>
               <b>ID:</b> {viewingFee.studentId}
@@ -482,36 +400,14 @@ const Fees = () => {
               <b>Term:</b> {viewingFee.term}
             </p>
             <p>
-              <b>Amount:</b> ₦{viewingFee.amount.toLocaleString()}
+              <b>Amount:</b> ₦{Number(viewingFee.amount).toLocaleString()}
             </p>
             <p>
-              <b>Paid:</b> ₦{viewingFee.amountPaid.toLocaleString()}
-            </p>
-            <p>
-              <b>Balance:</b> ₦{viewingFee.balance.toLocaleString()}
-            </p>
-            <p>
-              <b>Status:</b> {viewingFee.status}
-            </p>
-            <p>
-              <b>Date:</b>
-              {viewingFee.date
-                ? new Date(viewingFee.date).toLocaleDateString("en-NG", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })
-                : "N/A" }
-            </p>
-            <p>
-              <b>Time:</b>
-              {viewingFee.date
-                ? new Date(viewingFee.date).toLocaleTimeString("en-NG")
-                : "N/A" }
+              <b>Paid:</b> ₦{Number(viewingFee.amountPaid).toLocaleString()}
             </p>
             <button
+              className="mt-4 bg-red-600 text-white px-4 py-2 rounded"
               onClick={() => setViewingFee(null)}
-              style={{ marginTop: "15px", background: "red", color: "white" }}
             >
               Close
             </button>
