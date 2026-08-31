@@ -117,7 +117,9 @@ const Result = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div
+      style={{ display: "grid", mid:"grid-cols-2", padding: "20px" }}
+    >
       <h2>📝 Student Result Management</h2>
 
       {/* FORM */}

@@ -71,7 +71,7 @@ const Classes = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{display: "grid", mid: "grid-col-2", padding: "20px" }}>
       <h2>🏫 Class Management</h2>
 
       {/* FORM */}
